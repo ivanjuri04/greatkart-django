@@ -6,3 +6,4 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields={'slug':('category_name',)} ##da se automatski pise u slug i category name
     list_display= ( 'category_name','slug')
 admin.site.register(Category,CategoryAdmin)
+
