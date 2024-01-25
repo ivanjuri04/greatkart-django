@@ -53,7 +53,7 @@ class Account(AbstractBaseUser,PermissionsMixin):
     USERNAME_FIELD='email' ##mos se sa emailon logatirat
     REQUIRED_FIELDS=['username','first_name','last_name']
 
-    object=MyAccountManager()
+    objects=MyAccountManager()
     
     def __str__(self):
      return self.email 
