@@ -13,7 +13,7 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Billing Address</h4>
-                    <form action="" method="POST">
+                    <form action="{%url 'place_order'%}" method="POST">
                         {%csrf_token%}
                         <div class="form-row">
                             <div class="col form-group mb-2">
@@ -50,7 +50,7 @@
                             </div>
                             <div class="col form-group mb-2">
                                 <label for="">Country</label>
-                                <input type="text" name="state" class="form-control" required>
+                                <input type="text" name="country" class="form-control" required>
                             </div>
                             <div class="col form-group mb-2">
                                 <label for="">Zip code</label>
@@ -98,6 +98,7 @@
                 
                                         {%endfor%}
                                       {%endif%}  
+                                    </p>
                 
                                     
                                 </figcaption>
@@ -121,7 +122,7 @@
                     </table>
               
                 
-                <button type="submit" name="submit" class="btn btn-primary btn-block">Submit</button>
+                <button type="submit" name="submit" class="btn btn-primary btn-block">Place Order</button>
                 <a href="{%url 'store'%}" class="btn btn-light btn-block">Continue Shopping</a>
             </form>
             </div> <!-- card-body.// -->
