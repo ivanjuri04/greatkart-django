@@ -1,13 +1,13 @@
 from django.forms import SlugField
 from django.shortcuts import render,get_object_or_404
 from . import views
-from .models import Product,Category
+from .models import Product,Category,ProductGallery
 from category.models import Category
 from carts.models import CartItem
 from carts.views import _cart_id
 from django.http import HttpResponse
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
-from django.db.models import Q
+from django.db.models import Q ,Min ,Max
 
 
 
@@ -28,13 +28,21 @@ def store(request,category_slug=None):
         page=request.GET.get('page')
         paged_product=paginator.get_page(page)
         product_count=products.count()   
+    MinMaxPrice=Product.objects.aggregate(Min('price'),Max('price'))
 
 
     context={ 
         'products':paged_product,
         'product_count':product_count,
+        'MinMaxPrice':MinMaxPrice,
     }
     return render (request,'store.html',context)
+
+
+
+
+
+
 
 def product_detail(request,category_slug,product_slug):
     try:
@@ -45,10 +53,14 @@ def product_detail(request,category_slug,product_slug):
     except Exception as e:
         raise e
     
+    ##get the product gallery
+    product_gallery=ProductGallery.objects.filter(product_id=single_product.id)
+    
     context={ 
         
         'single_product':single_product,
         'in_cart':in_cart,
+        'product_gallery':product_gallery,
     }
 
     return render(request,'product_detail.html',context)
@@ -64,3 +76,19 @@ def search(request):
                 'product_count':product_count
             }
     return render(request,'store.html',context)
+
+
+def price(request):
+    if 'max_price' and 'min_price' in request.GET:
+        max=request.GET['max_price']
+        min=request.GET['min_price']
+        if max and min:
+            products = Product.objects.filter(price__gte=min, price__lte=max)
+
+        context={
+                'products':products,
+            
+            }
+           
+    return render(request,'store.html',context)
+
