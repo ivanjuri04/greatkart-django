@@ -32,7 +32,7 @@ def register(request):
             user.phone_number=phone_number  
             user.save()
             messages.success(request,'Registration successful')
-            return redirect('register')
+            return redirect('login')
         else:
             form=RegistrationForm()
         context={'form':form,
@@ -100,7 +100,7 @@ def login(request):
             try:
                 query=requests.utils.urlparse(url).query
                 #print('query-->',query) ##query--> next=/cart/checkout/
-                params=dict(x.split('=') for x in query.split('&')) ##{'next': '/cart/checkout/'}
+                params=dict(x.split('=') for x in query.split('&')) ##{'next': '/cart/checkout/'} da se vrati os stranuce di je bia
                 #print('parms-->' , params)
                 if 'next' in params :
                     nextPage=params['next']

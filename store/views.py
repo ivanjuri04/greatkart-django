@@ -28,7 +28,7 @@ def store(request,category_slug=None):
         page=request.GET.get('page')
         paged_product=paginator.get_page(page)
         product_count=products.count()   
-    MinMaxPrice=Product.objects.aggregate(Min('price'),Max('price'))
+    MinMaxPrice=Product.objects.aggregate(Min('price'),Max('price'))#da maknen ovo nebi bilo plachoder price
 
 
     context={ 

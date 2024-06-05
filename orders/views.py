@@ -3,6 +3,7 @@ from django.http import HttpResponse,JsonResponse
 from carts.models import CartItem
 from .forms import OrderForm
 from .models import Order
+from .models import TaxSettings
 from .models import Payment
 from .models import OrderProduct
 from store.models import Product
@@ -11,14 +12,16 @@ import json
 # Create your views here.
 
 def  place_order(request):
-
+    tax_settings = TaxSettings.objects.first()
+    if tax_settings:
+            tax_percentage = float(tax_settings.tax_percentage)
     current_user=request.user
     cart_items=CartItem.objects.filter(user=current_user)
     cart_count=cart_items.count()
     if cart_count <= 0  :
         return redirect('store')
     
-    grand_total=0
+   
     tax=0
     total=0
     quantity=0
@@ -27,8 +30,8 @@ def  place_order(request):
         total+=(cart_item.product.price * cart_item.quantity)
         quantity+=cart_item.quantity
 
-    tax=(0.25*total)
-    grand_total=total+tax
+    tax=((tax_percentage/100)*total)
+    
 
     
     if request.method == 'POST':
@@ -48,7 +51,7 @@ def  place_order(request):
             data.zip_code = form.cleaned_data['zip_code']
             data.city = form.cleaned_data['city']
             data.order_note = form.cleaned_data['order_note']
-            data.order_total=grand_total
+            data.order_total=total
             data.tax=tax
             data.ip=request.META.get('REMOTE_ADDR')
             data.save()
@@ -71,7 +74,7 @@ def  place_order(request):
                 'cart_items':cart_items,
                 'total':total,
                 'tax':tax,
-                'grand_total':grand_total,
+                
             }
             
             return render(request,'payments.html',context)

@@ -1,12 +1,15 @@
 from django.shortcuts import render
 from django.shortcuts import redirect,get_object_or_404
 from store.models import Product
+from orders.models import TaxSettings
 from .models import CartItem
 from .models import Cart
 from store.models import Variation
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+
 
 
 
@@ -23,6 +26,8 @@ def _cart_id(request):  #inace ako nisi log po cart id zna sta si kupija
 def add_cart(request,product_id):
     current_user = request.user
     product = Product.objects.get(id=product_id) #get the product
+    stock_count = product.stock
+    
     # If the user is authenticated
     if current_user.is_authenticated:#ako je user auth
         product_variation = []
@@ -34,6 +39,7 @@ def add_cart(request,product_id):
                 try:
                     variation = Variation.objects.get(product=product, variation_category__iexact=key, variation_value__iexact=value)
                     product_variation.append(variation)
+                    
                 except:
                     pass
 
@@ -53,8 +59,11 @@ def add_cart(request,product_id):
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
-                item.quantity += 1
-                item.save()
+                if item.quantity < stock_count:
+                    item.quantity += 1
+                    item.save()
+                else:
+                    messages.error(request, 'You cannot add more of this product than we have in stock.')
 
             else:
                 item = CartItem.objects.create(product=product, quantity=1, user=current_user)
@@ -176,6 +185,9 @@ def remove_cart_item(request,product_id,cart_item_id):
 
 
 def cart(request,total=0,quantity=0,cart_items=None):
+    tax_settings = TaxSettings.objects.first()
+    if tax_settings:
+            tax_percentage = float(tax_settings.tax_percentage)
     try:
 
         tax=0
@@ -188,7 +200,7 @@ def cart(request,total=0,quantity=0,cart_items=None):
         for cart_item in cart_items:
             total+=(cart_item.product.price * cart_item.quantity)
             quantity+=cart_item.quantity
-        tax=(0.25*total)
+        tax=((tax_percentage/100)*total)
         grand_total=total+tax   
     except ObjectDoesNotExist:
         pass
@@ -206,6 +218,9 @@ def cart(request,total=0,quantity=0,cart_items=None):
 
 @login_required(login_url='login')
 def checkout(request,total=0,quantity=0,cart_items=None):
+    tax_settings = TaxSettings.objects.first()
+    if tax_settings:
+            tax_percentage = float(tax_settings.tax_percentage)
     try:
 
         tax=0
@@ -218,7 +233,7 @@ def checkout(request,total=0,quantity=0,cart_items=None):
         for cart_item in cart_items:
             total+=(cart_item.product.price * cart_item.quantity)
             quantity+=cart_item.quantity
-        tax=(0.25*total)
+        tax=((tax_percentage/100)*total)
         grand_total=total+tax   
     except ObjectDoesNotExist:
         pass
