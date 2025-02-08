@@ -147,7 +147,7 @@ def payments(request):
 
 
 def order_complete(request):
-    order_number=request.GET.get('order_number')
+    order_number=request.GET.get('order_number') ##dohvaca iz url
     transID=request.GET.get('payment_id') ##sad priko order_number i tranksID printsmo podatke kupnje
 
     payment=Payment.objects.get(payment_id=transID)
